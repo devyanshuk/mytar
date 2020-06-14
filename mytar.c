@@ -112,7 +112,7 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 		fflush(stdout);
 		fprintf(stderr, "%s", "mytar: Unexpected EOF in archive\n");
 		errx(2, "Error is not recoverable: exiting now");
-    }
+	}
 
 		bool found = false;
 		for (int i = index; i < argc; i++){
