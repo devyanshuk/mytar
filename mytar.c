@@ -64,9 +64,10 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 		strncpy(size, header->s_m_c, 12);
 		strncpy(mtime, header->s_m_c+12, 12);
 		strncpy(chksum, header->s_m_c+24, 8);
-		if (header->typeflag != '0' && header->typeflag!='\x00'){
+
+		if (header->typeflag != '0' && header->typeflag!='\x00')
 			errx(2, "%s%d", "Unsupported header type: ", header->typeflag);
-		}
+
 		// Since size is in octal, we need to convert to decimal
 		char *ptr;
 		long file_size;
@@ -103,9 +104,8 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 
 	int zero2Chksum = calculateCheckSum(blockSize, zero2Position, buffer);
 
-	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize){
+	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize)
 		printf("mytar: A lone zero block at %d\n", 1 + zero1Position/blockSize);
-	}
 
 		bool found = false;
 
@@ -123,16 +123,15 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 			errx(2, "Error is not recoverable: exiting now");
 	    }
 
-		if (found){
+		if (found)
 			errx(2, "Exiting with failure status due to previous errors");
-		}
 }
 
 char* openTarFile(char *file){
 	FILE *tarFile;
 	tarFile = fopen(file , "rb" );
 	if (!tarFile)
-		errx(2, "no file");
+		errx(2, "%s '%s'","Error opening archive: Failed to open", file);
 
 	long tarRead;
 
@@ -166,9 +165,9 @@ int main(int argc, char *argv[])
 			printTarFiles(buffer, argv, ind, argc);
 			break;
 		}
-		if (tOptionFound && !fOptionFound){
+		if (tOptionFound && !fOptionFound)
 		    tBeforeF = true;
-		}
+
 		if (i < argc){
 			optionFound = (argv[i][0] == '-');
 			if (optionFound){
