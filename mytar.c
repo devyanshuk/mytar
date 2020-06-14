@@ -108,13 +108,8 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 		printf("mytar: A lone zero block at %d\n", 1 + zero1Position/blockSize);
 	}
 
-	if (tarSize-zero1Position < 0 && zero2Chksum != blockSize && zero1Chksum != blockSize) {
-		fflush(stdout);
-		fprintf(stderr, "%s", "mytar: Unexpected EOF in archive\n");
-		errx(2, "Error is not recoverable: exiting now");
-	}
-
 		bool found = false;
+
 		for (int i = index; i < argc; i++){
 			if (strcmp(searchNames[i], " ") != 0){
 				fprintf(stderr, "%s: %s: %s\n", "mytar", searchNames[i], "Not found in archive");
@@ -122,6 +117,13 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 				found = true;
 			}
 		}
+
+		if (tarSize-zero1Position < 0 && zero2Chksum != blockSize && zero1Chksum != blockSize) {
+			fflush(stdout);
+			fprintf(stderr, "%s", "mytar: Unexpected EOF in archive\n");
+			errx(2, "Error is not recoverable: exiting now");
+	    }
+
 		if (found){
 			errx(2, "Exiting with failure status due to previous errors");
 		}
