@@ -52,10 +52,10 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 	const int blockSize=512;
 	int fileOffset = 0;
 	int position = 0; //current
+	char *size = malloc(12);
+	char *mtime = malloc(12);
+	char *chksum = malloc(8);
 	do{
-		char *size = malloc(12);
-		char *mtime = malloc(12);
-		char *chksum = malloc(8);
 		position += fileOffset;
 
 		tarHeader* header;
