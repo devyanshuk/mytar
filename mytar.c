@@ -22,6 +22,9 @@ typedef struct ustar_header_block {
     char mode[8];
     char uid[8];
     char gid[8];
+    //char size[12];
+    //char mtime[12];
+    //char chksum[8];
     char s_m_c[32];
     char typeflag;
     char linkname[100];
@@ -53,7 +56,7 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
         strncpy(mtime, header->s_m_c+12, 12);
         strncpy(chksum, header->s_m_c+24, 8);
         if (header->typeflag != '0' && header->typeflag!='\x00'){
-            errx(2, "%s%c", "Unsupported header type: ", header->typeflag);
+            errx(2, "%s%d", "Unsupported header type: ", header->typeflag);
         }
 		// Since size is in octal, we need to convert to decimal
 		char *ptr;
@@ -83,7 +86,8 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
 	} while(position + file_offset + block_size + 2 * block_size <= tarSize);
 	int zero1_position = position + file_offset;
 	int zero2_position = zero1_position + block_size;
-// First Zero block check
+
+    // First Zero block check
 	int zero1_chksum = 0;
 	for (int i = 0; i<=block_size; i++){
 		if (buffer[zero1_position + i] == '\x00'){
@@ -97,8 +101,6 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
 			zero2_chksum+=1;
 		}
 	}
-
-    //printf("01 = %d 02 = %d tarsize = %ld\n", zero1_position, zero2_position, tarSize);
 
     if (zero1_chksum == block_size || tarSize - zero1_position == block_size){
         printf("mytar: A lone zero block at %d\n", 1 + zero1_position/block_size);
@@ -123,8 +125,6 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
     }
 }
 
-
-
 char* openTarFile(char *file){
 	FILE *tarFile;
 	tarFile = fopen(file , "rb" );
@@ -135,9 +135,7 @@ char* openTarFile(char *file){
 
 	fseek(tarFile, 0, SEEK_END);
 	tarSize = ftell(tarFile);
-    //printf("Tarsize: %ld", tarSize);
 	fseek(tarFile, 0, SEEK_SET);
-
 
 	char *buffer;
 	buffer = (char*) malloc(tarSize);
@@ -177,7 +175,7 @@ int main(int argc, char *argv[])
     			char currChar = argv[i][1];
     			if (!fOptionFound) fOptionFound = (currChar == 'f');
     			if (!tOptionFound) tOptionFound = (currChar == 't');
-    			if (fOptionFound && (argc == i+1 || argv[i+1][0] == '-')){
+    			if (fOptionFound && !fileNameFound && (argc == i+1 || argv[i+1][0] == '-')){
                     printf("%d", i);
                     printf("%c", argv[i][0]);
     				errx(2, noFileNameErr);
@@ -192,6 +190,5 @@ int main(int argc, char *argv[])
             break;
         }
 }
-
 	return out;
 }
