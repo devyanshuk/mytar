@@ -4,7 +4,8 @@
 This tar implementation lists GNU tar archives created via the following invocation:
 
 ```console
-devyanshu@10:~$ tar -f archive.tar -c <files>
+devyanshu@10:~$ touch 1.txt 2.txt 3.txt
+devyanshu@10:~$ tar -f archive.tar -c *.txt
 ```
 
 ##### Compiling the program:
