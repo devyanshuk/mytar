@@ -82,8 +82,10 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
 		}
 
 		if (position + file_offset + 2 * block_size >= tarSize)
-		break;
+			break;
+
 	} while(position + file_offset + block_size + 2 * block_size <= tarSize);
+
 	int zero1_position = position + file_offset;
 	int zero2_position = zero1_position + block_size;
 
