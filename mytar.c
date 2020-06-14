@@ -17,7 +17,7 @@ int out = 0;
 #define noFileNameErr "Option -f requires an argument"
 #define badTarFileName "mytar: Error opening archive: Failed to open"
 
-typedef struct ustar_header_block {
+typedef struct ustarHeaderBlock {
 	char name[100];
 	char mode[8];
 	char uid[8];
@@ -35,22 +35,22 @@ typedef struct ustar_header_block {
 	char devmajor[8];
 	char devminor[8];
 	char prefix[155];
-} tar_header;
+} tarHeader;
 
 
-void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
+void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 	bool fileToSearch = (argc != index);
-	const int block_size=512;
-	int file_offset = 0;
+	const int blockSize=512;
+	int fileOffset = 0;
 	int position = 0; //current
 	do{
 		char *size = malloc(12);
 		char *mtime = malloc(12);
 		char *chksum = malloc(8);
-		position += file_offset;
+		position += fileOffset;
 
-		tar_header* header;
-		header = (tar_header*)(buffer+position);
+		tarHeader* header;
+		header = (tarHeader*)(buffer+position);
 
 		strncpy(size, header->s_m_c, 12);
 		strncpy(mtime, header->s_m_c+12, 12);
@@ -64,7 +64,7 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
 		file_size = strtoul(size, &ptr, 8);
 
 		// Offset position of the file based on size of file
-		file_offset = (1 + file_size/block_size) * block_size;
+		fileOffset = (1 + file_size/blockSize) * blockSize;
 
 		if (!fileToSearch)
 			printf("%s\n", header->name);
@@ -81,34 +81,34 @@ void print_tarFiles(char *buffer, char** searchNames, int index, int argc){
 			}
 		}
 
-		if (position + file_offset + 2 * block_size >= tarSize)
+		if (position + fileOffset + 2 * blockSize >= tarSize)
 			break;
 
-	} while(position + file_offset + block_size + 2 * block_size <= tarSize);
+	} while(position + fileOffset + blockSize + 2 * blockSize <= tarSize);
 
-	int zero1_position = position + file_offset;
-	int zero2_position = zero1_position + block_size;
+	int zero1Position = position + fileOffset;
+	int zero2Position = zero1Position + blockSize;
 
 	// First Zero block check
-	int zero1_chksum = 0;
-	for (int i = 0; i<=block_size; i++){
-		if (buffer[zero1_position + i] == '\x00'){
-			zero1_chksum+=1;
+	int zero1Chksum = 0;
+	for (int i = 0; i<=blockSize; i++){
+		if (buffer[zero1Position + i] == '\x00'){
+			zero1Chksum+=1;
 		}
 	}
 
-	int zero2_chksum = 0;
-	for (int i = 0; i <= block_size; i++){
-		if (buffer[zero2_position + i] == '\x00'){
-			zero2_chksum+=1;
+	int zero2Chksum = 0;
+	for (int i = 0; i <= blockSize; i++){
+		if (buffer[zero2Position + i] == '\x00'){
+			zero2Chksum+=1;
 		}
 	}
 
-	if (zero1_chksum == block_size || tarSize - zero1_position == block_size){
-		printf("mytar: A lone zero block at %d\n", 1 + zero1_position/block_size);
+	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize){
+		printf("mytar: A lone zero block at %d\n", 1 + zero1Position/blockSize);
 	}
 
-	if (tarSize-zero1_position < 0 && zero2_chksum != block_size && zero1_chksum != block_size) {
+	if (tarSize-zero1Position < 0 && zero2Chksum != blockSize && zero1Chksum != blockSize) {
 		fflush(stdout);
 		fprintf(stderr, "%s", "mytar: Unexpected EOF in archive\n");
 		errx(2, "Error is not recoverable: exiting now");
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 
 		if (tOptionFound && fileNameFound){
 			int ind = (tBeforeF)? i+1 : i;
-			print_tarFiles(buffer, argv, ind, argc);
+			printTarFiles(buffer, argv, ind, argc);
 			break;
 		}
 		if (tOptionFound && !fOptionFound){
