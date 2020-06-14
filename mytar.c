@@ -37,6 +37,15 @@ typedef struct ustarHeaderBlock {
 	char prefix[155];
 } tarHeader;
 
+int calculateCheckSum(int blockSize, int pos, char *buffer){
+	int chksum = 0;
+	for (int i = 0; i<=blockSize; i++){
+		if (buffer[pos + i] == '\x00'){
+			chksum+=1;
+		}
+	}
+	return chksum;
+}
 
 void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 	bool fileToSearch = (argc != index);
@@ -90,19 +99,9 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 	int zero2Position = zero1Position + blockSize;
 
 	// First Zero block check
-	int zero1Chksum = 0;
-	for (int i = 0; i<=blockSize; i++){
-		if (buffer[zero1Position + i] == '\x00'){
-			zero1Chksum+=1;
-		}
-	}
+	int zero1Chksum = calculateCheckSum(blockSize, zero1Position, buffer);
 
-	int zero2Chksum = 0;
-	for (int i = 0; i <= blockSize; i++){
-		if (buffer[zero2Position + i] == '\x00'){
-			zero2Chksum+=1;
-		}
-	}
+	int zero2Chksum = calculateCheckSum(blockSize, zero2Position, buffer);
 
 	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize){
 		printf("mytar: A lone zero block at %d\n", 1 + zero1Position/blockSize);
