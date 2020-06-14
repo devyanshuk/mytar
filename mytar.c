@@ -176,8 +176,6 @@ int main(int argc, char *argv[])
 				if (!fOptionFound) fOptionFound = (currChar == 'f');
 				if (!tOptionFound) tOptionFound = (currChar == 't');
 				if (fOptionFound && !fileNameFound && (argc == i+1 || argv[i+1][0] == '-')){
-					printf("%d", i);
-					printf("%c", argv[i][0]);
 					errx(2, noFileNameErr);
 				}
 
