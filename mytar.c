@@ -22,10 +22,9 @@ typedef struct ustarHeaderBlock {
 	char mode[8];
 	char uid[8];
 	char gid[8];
-	//char size[12];
-	//char mtime[12];
-	//char chksum[8];
-	char s_m_c[32];
+	char size[12];
+	char mtime[12];
+	char chksum[8];
 	char typeflag;
 	char linkname[100];
 	char magic[6];
@@ -52,18 +51,11 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 	const int blockSize=512;
 	int fileOffset = 0;
 	int position = 0; //current
-	char *size = malloc(12);
-	char *mtime = malloc(12);
-	char *chksum = malloc(8);
 	do{
 		position += fileOffset;
 
 		tarHeader* header;
 		header = (tarHeader*)(buffer+position);
-
-		strncpy(size, header->s_m_c, 12);
-		strncpy(mtime, header->s_m_c+12, 12);
-		strncpy(chksum, header->s_m_c+24, 8);
 
 		if (header->typeflag != '0' && header->typeflag!='\x00')
 			errx(2, "%s%d", "Unsupported header type: ", header->typeflag);
@@ -71,10 +63,14 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 		// Since size is in octal, we need to convert to decimal
 		char *ptr;
 		long file_size;
-		file_size = strtoul(size, &ptr, 8);
+		file_size = strtoul(header->size, &ptr, 8);
 
 		// Offset position of the file based on size of file
 		fileOffset = (1 + file_size/blockSize) * blockSize;
+
+		if (strcmp(header->chksum, "") == 0){
+			break;
+		}
 
 		if (!fileToSearch)
 			printf("%s\n", header->name);
@@ -91,8 +87,9 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 			}
 		}
 
-		if (position + fileOffset + 2 * blockSize >= tarSize)
+		if (position + fileOffset + 2 * blockSize >= tarSize){
 			break;
+		}
 
 	} while(position + fileOffset + blockSize + 2 * blockSize <= tarSize);
 
@@ -104,8 +101,9 @@ void printTarFiles(char *buffer, char** searchNames, int index, int argc){
 
 	int zero2Chksum = calculateCheckSum(blockSize, zero2Position, buffer);
 
-	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize)
+	if (zero1Chksum == blockSize || tarSize - zero1Position == blockSize){
 		printf("mytar: A lone zero block at %d\n", 1 + zero1Position/blockSize);
+	}
 
 		bool found = false;
 
@@ -133,15 +131,13 @@ char* openTarFile(char *file){
 	if (!tarFile)
 		errx(2, "%s '%s'","Error opening archive: Failed to open", file);
 
-	long tarRead;
-
 	fseek(tarFile, 0, SEEK_END);
 	tarSize = ftell(tarFile);
 	fseek(tarFile, 0, SEEK_SET);
 
 	char *buffer;
 	buffer = (char*) malloc(tarSize);
-	tarRead = fread(buffer,sizeof(char),tarSize,tarFile);
+	fread(buffer,sizeof(char),tarSize,tarFile);
 	return buffer;
 }
 
