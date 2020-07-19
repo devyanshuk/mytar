@@ -58,3 +58,15 @@ devyanshu@10:~$ ./mytar -v -x -f archive.tar
 devyanshu@10:~$ ls
 1.txt 2.txt 3.txt
 ```
+
+##### Selective extraction :
+
+```console
+devyanshu@10:~$ ./mytar -v -x -f archive.tar 1.txt asd.txt
+1.txt
+mytar: asd.txt: Not found in archive
+mytar: Exiting with failure status due to previous errors
+devyanshu@10:~$ ls
+1.txt
+```
+
