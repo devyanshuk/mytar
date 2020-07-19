@@ -48,7 +48,7 @@ devyanshu@10:~$ ls
 1.txt 2.txt 3.txt
 ```
 
-##### Extracting files from the archive with files verbosely :
+##### Extracting files from the archive with the verbose option :
 
 ```console
 devyanshu@10:~$ ./mytar -v -x -f archive.tar
